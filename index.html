@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>나만의 테트리스 게임</title>
+  <title>닌텐도 레트로 테트리스</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,91 +12,113 @@
     }
 
     body {
-      background-color: #1a1a1a;
+      /* 업로드하신 배경 이미지를 전체 화면에 적용 */
+      background: url('bg.png') no-repeat center center fixed;
+      background-size: cover;
       color: #fff;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      overflow: hidden;
     }
 
+    /* 게임 전체를 감싸는 반투명 유리 느낌의 컨테이너 */
     .container {
       display: flex;
       gap: 20px;
-      background-color: #2a2a2a;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      background: rgba(20, 20, 20, 0.75); /* 반투명 검은색 배경 */
+      backdrop-filter: blur(8px);          /* 배경 블러 효과 */
+      padding: 25px;
+      border-radius: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
     }
 
     .game-board-container {
       position: relative;
     }
 
+    /* 테트리스 게임판 (Canvas) */
     #tetris {
-      border: 3px solid #444;
-      background-color: #000;
+      border: 3px solid #ff4757; /* 레트로 느낌의 붉은 테두리 */
+      background-color: rgba(0, 0, 0, 0.85);
       display: block;
+      border-radius: 4px;
+      box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
     }
 
+    /* 오른쪽 정보 및 버튼 사이드바 */
     .sidebar {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-width: 150px;
+      min-width: 160px;
     }
 
     .info-box {
-      background-color: #333;
-      padding: 15px;
+      background: rgba(40, 40, 40, 0.8);
+      padding: 12px;
       border-radius: 8px;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .info-box h2 {
-      font-size: 14px;
-      color: #aaa;
+      font-size: 13px;
+      color: #eccc68; /* 레트로 골드 컬러 */
       margin-bottom: 5px;
       text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .info-box p {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: bold;
-      color: #00ffcc;
+      color: #70a1ff;
     }
 
     .controls-info {
-      background-color: #333;
-      padding: 15px;
+      background: rgba(30, 30, 30, 0.8);
+      padding: 12px;
       border-radius: 8px;
       font-size: 12px;
       line-height: 1.6;
-      color: #ccc;
+      color: #ddd;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .controls-info h3 {
-      color: #fff;
-      margin-bottom: 8px;
+      color: #2ed573;
+      margin-bottom: 6px;
+      font-size: 14px;
     }
 
+    /* 시작 버튼 (닌텐도 스타일 RED) */
     #start-btn {
-      background-color: #00ffcc;
-      color: #000;
+      background-color: #ff4757;
+      color: #fff;
       border: none;
       padding: 12px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all 0.2s ease;
       width: 100%;
+      box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4);
+      margin-top: 10px;
     }
 
     #start-btn:hover {
-      background-color: #00cca3;
+      background-color: #ff6b81;
+      transform: translateY(-2px);
+    }
+
+    #start-btn:active {
+      transform: translateY(0);
     }
   </style>
 </head>
@@ -143,22 +165,21 @@
     const linesElement = document.getElementById('lines');
     const startBtn = document.getElementById('start-btn');
 
-    // 블록 크기 확대 (240x400 Canvas 기준 12행 20열 => 20px 단위)
+    // 240x400 Canvas 기준 (12열 20행 => 1칸당 20px)
     context.scale(20, 20);
 
-    // 테트리스 블록 색상 설정
+    // 테트리스 블록 네온 색상
     const colors = [
       null,
-      '#FF0D72', // T
-      '#0DC2FF', // I
-      '#0DFF72', // S
-      '#F538FF', // Z
-      '#FF8E0D', // L
-      '#FFE138', // J
-      '#3877FF'  // O
+      '#ff4757', // T (Red)
+      '#00d2d3', // I (Cyan)
+      '#2ed573', // S (Green)
+      '#ff6b81', // Z (Pink)
+      '#ffa502', // L (Orange)
+      '#1e90ff', // J (Blue)
+      '#eccc68'  // O (Yellow)
     ];
 
-    // 블록 모양 생성 함수
     function createPiece(type) {
       if (type === 'I') {
         return [
@@ -205,7 +226,6 @@
       }
     }
 
-    // 12 x 20 크기의 게임 판 생성
     function createMatrix(w, h) {
       const matrix = [];
       while (h--) {
@@ -224,7 +244,6 @@
       level: 1,
     };
 
-    // 충돌 검사
     function collide(arena, player) {
       const m = player.matrix;
       const o = player.pos;
@@ -239,7 +258,6 @@
       return false;
     }
 
-    // 쌓인 블록 판에 병합
     function merge(arena, player) {
       player.matrix.forEach((row, y) => {
         row.forEach((value, x) => {
@@ -250,7 +268,6 @@
       });
     }
 
-    // 완성된 줄 삭제 및 점수 계산
     function arenaSweep() {
       let rowCount = 1;
       let clearedLines = 0;
@@ -274,20 +291,18 @@
       if (clearedLines > 0) {
         player.lines += clearedLines;
         player.level = Math.floor(player.lines / 10) + 1;
-        dropInterval = Math.max(100, 1000 - (player.level - 1) * 100); // 레벨 상승 시 속도 증가
+        dropInterval = Math.max(100, 1000 - (player.level - 1) * 100);
       }
     }
 
-    // 화면 그리기
     function draw() {
-      context.fillStyle = '#000';
+      context.fillStyle = 'rgba(0, 0, 0, 0.85)';
       context.fillRect(0, 0, canvas.width, canvas.height);
 
       drawMatrix(arena, {x: 0, y: 0});
       drawMatrix(player.matrix, player.pos);
     }
 
-    // 매트릭스(블록 및 바닥) 그리기
     function drawMatrix(matrix, offset) {
       matrix.forEach((row, y) => {
         row.forEach((value, x) => {
@@ -295,8 +310,7 @@
             context.fillStyle = colors[value];
             context.fillRect(x + offset.x, y + offset.y, 1, 1);
             
-            // 테두리 선 추가로 블록 구분을 명확히 표현
-            context.strokeStyle = '#222';
+            context.strokeStyle = '#111';
             context.lineWidth = 0.05;
             context.strokeRect(x + offset.x, y + offset.y, 1, 1);
           }
@@ -304,7 +318,6 @@
       });
     }
 
-    // 블록 회전
     function rotate(matrix, dir) {
       for (let y = 0; y < matrix.length; ++y) {
         for (let x = 0; x < y; ++x) {
@@ -318,7 +331,6 @@
       }
     }
 
-    // 블록 이동
     function playerMove(offset) {
       player.pos.x += offset;
       if (collide(arena, player)) {
@@ -326,16 +338,14 @@
       }
     }
 
-    // 새로운 랜덤 블록 생성
     function playerReset() {
       const pieces = 'TJLOSZI';
       player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
       player.pos.y = 0;
       player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
 
-      // 게임 오버 체크
       if (collide(arena, player)) {
-        alert("게임 오버! 점수: " + player.score);
+        alert("게임 오버! 최종 점수: " + player.score);
         arena.forEach(row => row.fill(0));
         player.score = 0;
         player.lines = 0;
@@ -345,7 +355,6 @@
       }
     }
 
-    // 블록 떨어뜨리기 (하향)
     function playerDrop() {
       player.pos.y++;
       if (collide(arena, player)) {
@@ -358,7 +367,6 @@
       dropCounter = 0;
     }
 
-    // 하드 드롭 (스페이스바 입력 시 바닥까지 한번에)
     function playerHardDrop() {
       while (!collide(arena, player)) {
         player.pos.y++;
@@ -371,7 +379,6 @@
       dropCounter = 0;
     }
 
-    // 회전 처리 및 벽 충돌 방지
     function playerRotate(dir) {
       const pos = player.pos.x;
       let offset = 1;
@@ -387,7 +394,6 @@
       }
     }
 
-    // 점수 및 상태 업데이트
     function updateScore() {
       scoreElement.innerText = player.score;
       levelElement.innerText = player.level;
@@ -395,11 +401,10 @@
     }
 
     let dropCounter = 0;
-    let dropInterval = 1000; // 초기 떨어지는 속도 (1초)
+    let dropInterval = 1000;
     let lastTime = 0;
     let isRunning = false;
 
-    // 게임 루프
     function update(time = 0) {
       if (!isRunning) return;
 
@@ -415,25 +420,23 @@
       requestAnimationFrame(update);
     }
 
-    // 키보드 조작 이벤트
     document.addEventListener('keydown', event => {
       if (!isRunning) return;
 
-      if (event.keyCode === 37) { // 왼쪽 화살표
+      if (event.keyCode === 37) {
         playerMove(-1);
-      } else if (event.keyCode === 39) { // 오른쪽 화살표
+      } else if (event.keyCode === 39) {
         playerMove(1);
-      } else if (event.keyCode === 40) { // 아래쪽 화살표
+      } else if (event.keyCode === 40) {
         playerDrop();
-      } else if (event.keyCode === 38) { // 위쪽 화살표 (회전)
+      } else if (event.keyCode === 38) {
         playerRotate(1);
-      } else if (event.keyCode === 32) { // 스페이스바 (하드 드롭)
-        event.preventDefault(); // 스크롤 방지
+      } else if (event.keyCode === 32) {
+        event.preventDefault();
         playerHardDrop();
       }
     });
 
-    // 시작 / 재시작 버튼 이벤트
     startBtn.addEventListener('click', () => {
       arena.forEach(row => row.fill(0));
       player.score = 0;
